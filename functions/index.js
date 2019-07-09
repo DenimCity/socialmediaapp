@@ -5,42 +5,40 @@ const app = express();
 admin.initializeApp();
 
 
-app.get('/screams',(req, res) => {
-       admin
-       .firestore()
-       .collection('screams')
-       .get()
-      .then((data) => {
+app.get('/screams', async (req, res) => {
+
+      try {
             let screams = [];
-            data.forEach((doc) => {
-                  screams.push(doc.data())
+            const data =  await admin.firestore().collection('screams').orderBy('createdAt', 'desc').get();
+           data.forEach((doc) => {
+            screams.push({
+                  screamId: doc.id,
+                  ...doc.data()
+                  })
             });
             return res.json(screams)
-      })
-      .catch((err) => console.error(err))
-
+      } catch (error) {
+            console.error(err)
+            return res.status(400).json({error: `Error retrieving data`, why: error.message})
+      }
 })
 
 
-app.post('/scream',(req, res) => {
-
+app.post('/scream', async (req, res) => {
+      const { body, username } = req.body;
       const newScream = {
-            body: req.body.body,
-            username: req.body.username,
-            createdAt: admin.firestore.Timestamp.fromDate(new Date())
+            body,
+            username,
+            createdAt: new Date().toISOString()
       };
 
-      admin
-      .firestore()
-      .collection('screams')
-      .add(newScream)
-      .then(doc=> {
+      try {
+            const doc = await  admin.firestore().collection('screams').add(newScream)
             return res.json({message: `Document ${doc.id} created successfully`})
-      })
-      .catch((err) => {
-            res.status(500).json({error: `something went wrong`})
+      } catch (error) {
             console.error(err)
-      })
+            return res.status(500).json({error: `something went wrong`})
+      }
 })
 
 
