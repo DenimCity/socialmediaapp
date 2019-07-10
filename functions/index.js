@@ -1,13 +1,13 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const app = require('express')();
-
 const firebase = require('firebase');
+
 const firebaseConfig = require('./cred')
+const { validateRegisterInput, validateLoginInput } = require('./util/validator')
 
 firebase.initializeApp(firebaseConfig)
 admin.initializeApp();
-
 
 app.get('/screams', async (req, res) => {
 
@@ -54,7 +54,12 @@ app.post('/signup', async (req, res) => {
             confirmPassword: req.body.confirmPassword,
             username: req.body.username,
       }
-      
+
+      const {valid, errors} = validateRegisterInput(newUser);
+        if (!valid) {
+            return res.status(400).json({ message:'Input Validation Error', errors })
+       }
+
   let token, userId;
   db.doc(`/users/${newUser.username}`)
     .get()
@@ -96,4 +101,20 @@ app.post('/signup', async (req, res) => {
     });
 
 })
+
+app.post('/login', async ( { body: { email, password } }, res ) => {
+      try {
+         const {valid, errors} = validateLoginInput(email, password);
+         if (!valid)return res.status(400).json({ message:'User login Error', errors })
+         const data = await firebase.auth().signInWithEmailAndPassword(email, password)
+         const token = data.user.getIdToken()
+      return res.json({token})
+      } catch (error) {
+         console.error(error)
+         if (error.code === 'auth/wrong-password') {
+               return res.status(403).json({general: 'wrong credentials, please try again.'})
+         }
+         return res.status(500).json({error: error.code, message: error.message})
+      }
+});
 exports.api = functions.https.onRequest(app);
