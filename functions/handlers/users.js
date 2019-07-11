@@ -2,7 +2,7 @@ const BusBoy = require('busboy');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
-const { validateRegisterInput, validateLoginInput } = require('../util/validator')
+const { reduceUserDetails, validateRegisterInput, validateLoginInput } = require('../util/validator')
 const { admin, db} = require('../util/admin');
 
 const firebase = require('firebase');
@@ -68,7 +68,6 @@ exports.signup =  (req, res) => {
 }
 
 
-
 exports.login = (req, res) => {
   const user = {
     email: req.body.email,
@@ -98,6 +97,44 @@ exports.login = (req, res) => {
     });
 }
 
+/// Get own Authenticated Users details
+exports.getAuthenticatedUser = (req, res) => {
+  let userData = {}
+  db.doc(`/user/${req.user.handle}`).get()
+    .then(doc => {
+      if(doc.exists) {
+        userData.credentials = doc.data();
+        return db.collection('likes').where('userHandle', '==', req.user.handle).get();
+      }
+    })
+    .then(data => {
+      userData.likes = []
+      data.forEach(doc => {
+        userData.likes.push(doc.data());
+      })
+      return res.json(userData)
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({error: err.code})
+    })
+}
+
+
+
+//Add user details
+exports.addUserDetails = (req, res) => {
+  let userDetails = reduceUserDetails(req.body);
+
+  db.doc(`/users/${req.user.handle}`).update(userDetails)
+  .then(() => res.json({message: 'Details added successfully' }))
+  .catch(error => {
+    console.error(error)
+    return res.status(500).json({error: error.code})
+  })
+}
+
+// upload image profile
 exports.uploadImage = (req, res) => {
   
   let imageFilename
@@ -140,3 +177,4 @@ exports.uploadImage = (req, res) => {
  })
 busboy.end(req.rawBody)
 }
+
