@@ -1,9 +1,9 @@
 import { combineReducers, createStore, applyMiddleware, compose} from 'redux'
-import thunk from 'react-redux'
+import thunk from 'redux-thunk'
 
 import userReducer from './reducers/userReducer'
 import dataReducer from './reducers/dataReducer'
-import uiReducers from './reducers/uiReducers'
+import uiReducer from './reducers/uiReducer'
 
 const initialState = {}
 const middleware = [thunk];
@@ -11,7 +11,7 @@ const middleware = [thunk];
 const reducers = combineReducers({
       user: userReducer,
       data: dataReducer,
-      UI: uiReducers
+      UI: uiReducer
 })
 
 const composeEnhancers =
