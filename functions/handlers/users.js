@@ -23,10 +23,8 @@ exports.signup =  (req, res) => {
             return res.status(400).json({ message:'Input Validation Error', errors })
        }
 
+const noImg = 'no-img.png';
 
-  const noImg = 'no-img.png'
-  
-  
   let token, userId;
   db.doc(`/users/${newUser.handle}`)
     .get()
@@ -49,8 +47,10 @@ exports.signup =  (req, res) => {
         handle: newUser.handle,
         email: newUser.email,
         createdAt: new Date().toISOString(),
-        userId,
-        imageUrl: `https://firebasestorage.googleapis.comv/0/b${firebaseConfig.storageBucket}/o/${noImg}?alt=media`
+        imageUrl: `https://firebasestorage.googleapis.com/v0/b/${
+firebaseConfig.storageBucket
+        }/o/${noImg}?alt=media`,
+        userId
       };
       return db.doc(`/users/${newUser.handle}`).set(userCredentials);
     })
@@ -62,7 +62,9 @@ exports.signup =  (req, res) => {
       if (err.code === 'auth/email-already-in-use') {
         return res.status(400).json({ email: 'Email is already is use' });
       } else {
-        return res.status(500).json({ general: 'Something went wrong try again'});
+        return res
+          .status(500)
+          .json({ general: 'Something went wrong, please try again' });
       }
     });
 }
