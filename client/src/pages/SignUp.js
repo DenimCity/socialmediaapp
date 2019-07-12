@@ -1,6 +1,5 @@
-import React, { Component, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import withStyles from '@material-ui/core/styles/withStyles';
-import PropTypes from 'prop-types';
 import AppIcon from '../images/icon.png';
 import { Link } from 'react-router-dom';
 
@@ -18,46 +17,41 @@ const styles = (theme) => ({
   ...theme
 });
 
-class SignUp extends Component {
-  constructor() {
-    super();
-    this.state = {
+const SignUp = (props) =>  {
+
+  const [state, setState] = useState({
       email: '',
       password: '',
       confirmPassword: '',
       handle: '',
       errors: {}
-    };
-  }
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.UI.errors) {
-      this.setState({ errors: nextProps.UI.errors });
+    })
+  
+  useEffect(() =>{
+    if (props.UI.errors) {
+      setState({...state,  errors: props.UI.errors });
     }
-  }
-  handleSubmit = (event) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[props.UI.errors]) 
+
+  const handleSubmit = (event) => {
     event.preventDefault();
-    this.setState({
-      loading: true
-    });
+    setState({...state, loading: true });
     const newUserData = {
-      email: this.state.email,
-      password: this.state.password,
-      confirmPassword: this.state.confirmPassword,
-      handle: this.state.handle
+      email: state.email,
+      password: state.password,
+      confirmPassword: state.confirmPassword,
+      handle: state.handle
     };
-    this.props.signUpUser(newUserData, this.props.history);
+    props.signUpUser(newUserData, props.history);
   };
 
+
+  const handleChange = event => setState({...state, [event.target.name]: event.target.value})
   
-  handleChange = event => this.setState({[event.target.name]: event.target.value})
   
-  
-  render() {
-    const {
-      classes,
-      UI: { loading }
-    } = this.props;
-    const { errors } = this.state;
+    const { classes, UI: { loading } } = props;
+    const { errors } = state;
 
     return (
       <Grid container className={classes.form}>
@@ -67,7 +61,7 @@ class SignUp extends Component {
           <Typography variant="h2" className={classes.pageTitle}>
             SignUp
           </Typography>
-          <form noValidate onSubmit={this.handleSubmit}>
+          <form noValidate onSubmit={handleSubmit}>
             <TextField
               id="email"
               name="email"
@@ -76,8 +70,8 @@ class SignUp extends Component {
               className={classes.textField}
               helperText={errors.email}
               error={errors.email ? true : false}
-              value={this.state.email}
-              onChange={this.handleChange}
+              value={state.email}
+              onChange={handleChange}
               fullWidth
             />
             <TextField
@@ -88,8 +82,8 @@ class SignUp extends Component {
               className={classes.textField}
               helperText={errors.password}
               error={errors.password ? true : false}
-              value={this.state.password}
-              onChange={this.handleChange}
+              value={state.password}
+              onChange={handleChange}
               fullWidth
             />
             <TextField
@@ -100,8 +94,8 @@ class SignUp extends Component {
               className={classes.textField}
               helperText={errors.confirmPassword}
               error={errors.confirmPassword ? true : false}
-              value={this.state.confirmPassword}
-              onChange={this.handleChange}
+              value={state.confirmPassword}
+              onChange={handleChange}
               fullWidth
             />
             <TextField
@@ -112,8 +106,8 @@ class SignUp extends Component {
               className={classes.textField}
               helperText={errors.handle}
               error={errors.handle ? true : false}
-              value={this.state.handle}
-              onChange={this.handleChange}
+              value={state.handle}
+              onChange={handleChange}
               fullWidth
             />
             {errors.general && (
@@ -142,7 +136,6 @@ class SignUp extends Component {
         <Grid item sm />
       </Grid>
     );
-  }
 }
 
 

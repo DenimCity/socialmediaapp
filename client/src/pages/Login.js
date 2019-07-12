@@ -104,7 +104,6 @@ const Login = (props) =>  {
         <Grid item sm />
       </Grid>
     );
-  // }
 }
 
 const mapStateToProps = (state) => ({
