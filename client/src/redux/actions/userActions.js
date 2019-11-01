@@ -1,4 +1,4 @@
-import {SET_USER, SET_ERRORS, CLEAR_ERRORS, LOADING_UI, SET_AUTHENTICATED} from '../types';
+import {SET_USER, SET_ERRORS, CLEAR_ERRORS, LOADING_UI, LOADING_USER, SET_AUTHENTICATED, MARK_NOTIFICATIONS_READ} from '../types';
 import axios from 'axios';
 
 
@@ -12,8 +12,10 @@ export const loginUser = (userData, history ) => async (dispatch) => {
       dispatch({ type: CLEAR_ERRORS})
       history.push('/')
       } catch (error) {
-            dispatch({ type: SET_ERRORS,
-            payload: error.response.data })
+            console.log(error)
+            console.log(error)
+            // dispatch({ type: SET_ERRORS,
+            // payload: error.response.data })
       }
 }
 export const signUpUser = (newUserData, history) => (dispatch) => {
@@ -47,14 +49,49 @@ export const logoutUser = () => (dispatch) => {
 }
 
 
-
+export const uploadImage = (formData) => async (dispatch) =>{
+      dispatch({type: LOADING_USER })
+      try {
+            const response = await axios.post('/user/image',formData )
+            console.log(response.data)
+            if(response.data){
+                  dispatch(getUserData())
+            }
+      } catch (error) {
+            console.error(error)
+      }
+}
+export const editUserDetails = (userDetails) => async (dispatch) =>{
+      dispatch({type: LOADING_USER })
+      try {
+            const response = await axios.post('/user/',userDetails )
+            console.log(response.data)
+            if(response.data){
+                  dispatch(getUserData())
+            }
+      } catch (error) {
+            console.error(error)
+      }
+}
 
 
 export const getUserData = () => async (dispatch) => {
+      dispatch({ type: LOADING_USER })
      try {
       const res = await axios.get('/user');
             dispatch({ 
                   type: SET_USER,
+                  payload: res.data
+            })
+     } catch (error) {
+           console.error(error)
+     }
+}
+export const markNotificationsRead = (notificationIds) => async (dispatch) => {
+     try {
+      const res = await axios.post('/notifications', notificationIds);
+            dispatch({ 
+                  type: MARK_NOTIFICATIONS_READ,
                   payload: res.data
             })
      } catch (error) {

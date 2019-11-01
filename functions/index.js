@@ -5,6 +5,9 @@ const { signup, login, uploadImage, addUserDetails, getAuthenticatedUser,
 markNotificationsRead, getUserDetails } = require('./handlers/users')
 const { authCheck } = require('./util/middleware')
 const { db } = require('./util/admin')
+const cors = require('cors');
+
+app.use(cors());
 // scream routes
 app.get('/screams', getAllScreams);
 app.get('/scream/:screamId', getScream)
